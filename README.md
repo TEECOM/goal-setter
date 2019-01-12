@@ -1,3 +1,6 @@
+[![Build
+Status](https://semaphoreci.com/api/v1/thrillberg/goal-setter/branches/production/badge.svg)](https://semaphoreci.com/thrillberg/goal-setter)
+
 # Goal Setter
 
 This project centralizes the creation of GitHub issues that correspond with

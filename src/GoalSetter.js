@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
+import GoalsForm from './GoalsForm';
 
 class GoalSetter extends Component {
   render() {
     return (
-      <h1 id='root'>Goal Setter</h1>
+      <div id='root'>
+        <GoalsForm />
+      </div>
     );
   }
 }

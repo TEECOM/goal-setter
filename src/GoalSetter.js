@@ -9,12 +9,13 @@ class GoalSetter extends Component {
   };
 
   componentDidMount() {
+    const gatekeeperURI = process.env.REACT_APP_GATEKEEPER_URI
     const code =
       window.location.href.match(/\?code=(.*)/) &&
       window.location.href.match(/\?code=(.*)/)[1];
 
     if (code) {
-      fetch(`https://goal-setter-gatekeeper.herokuapp.com/authenticate/${code}`)
+      fetch(`${gatekeeperURI}/authenticate/${code}`)
         .then(response => response.json())
         .then(({ token }) => {
           this.setState({

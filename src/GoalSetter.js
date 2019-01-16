@@ -27,7 +27,7 @@ class GoalSetter extends Component {
   }
 
   displayContent() {
-    return(this.state.authenticated ? <GoalsForm /> : <Authenticate />);
+    return(this.state.authenticated ? <GoalsForm token={this.state.token} /> : <Authenticate />);
   }
 
   render() {

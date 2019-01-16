@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import GitHubApiCommunicator from './apiCommunicators/GitHubApiCommunicator';
 
 class GoalsForm extends Component {
   constructor(props) {
@@ -14,7 +15,7 @@ class GoalsForm extends Component {
   }
 
   handleSubmit(event) {
-    alert('A title was submitted: ' + this.state.value);
+    GitHubApiCommunicator.createMilestone(this.state.value, this.props.token);
     event.preventDefault();
   }
 

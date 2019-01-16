@@ -6,7 +6,7 @@ const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
 class Authenticate extends Component {
   render() {
     return (
-      <a href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=user&redirect_uri=${REDIRECT_URI}`}>
+      <a href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo,user&redirect_uri=${REDIRECT_URI}`}>
         Login
       </a>
     )

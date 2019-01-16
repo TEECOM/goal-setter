@@ -12,12 +12,13 @@ it('renders Authenticate when not authenticated', () => {
 
 it('renders GoalsForm when authenticated', () => {
   const goalSetter = shallow(<GoalSetter />);
-  goalSetter.setState({ authenticated: true });
+  goalSetter.setState({ authenticated: true, token: "anything" });
 
-  expect(goalSetter.contains(<GoalsForm />)).toEqual(true);
+  expect(goalSetter.contains(<GoalsForm token={"anything"} />)).toEqual(true);
 });
 
 it('fetches the token when code is present', () => {
+  process.env.REACT_APP_GATEKEEPER_URI = 'anything.com'
   window.history.pushState({}, 'Anything', '/?code=123');
 
   const mockSuccessResponse = {};
@@ -29,5 +30,5 @@ it('fetches the token when code is present', () => {
 
   shallow(<GoalSetter />);
 
-  expect(global.fetch).toHaveBeenCalledWith('https://goal-setter-gatekeeper.herokuapp.com/authenticate/123');
+  expect(global.fetch).toHaveBeenCalledWith('anything.com/authenticate/123');
 });

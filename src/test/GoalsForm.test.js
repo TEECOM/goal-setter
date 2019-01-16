@@ -1,6 +1,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import GoalsForm from '../GoalsForm';
+import apiCommunicator from '../apiCommunicators/GitHubApiCommunicator';
+
+jest.mock('../apiCommunicators/GitHubApiCommunicator');
 
 it('renders a form', () => {
   const goalsForm = shallow(<GoalsForm />);
@@ -19,14 +22,18 @@ it('handles user input', () => {
 });
 
 it('handles submission', () => {
-  window.alert = jest.fn();
+  apiCommunicator.mockImplementation(() => {
+    return {createMilestone: jest.fn()};
+  });
+
   const preventDefault = jest.fn();
 
-  const goalsForm = shallow(<GoalsForm />);
+  const token = 'A Great Token';
+  const goalsForm = shallow(<GoalsForm token={token} />);
   const title = 'A Great Title';
   goalsForm.setState({value: title});
 
   goalsForm.simulate('submit', { preventDefault });
 
-  expect(window.alert).toHaveBeenCalledWith(`A title was submitted: ${title}`);
+  expect(apiCommunicator.createMilestone).toHaveBeenCalledWith(title, token);
 });

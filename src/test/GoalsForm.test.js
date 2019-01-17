@@ -5,14 +5,20 @@ import apiCommunicator from '../apiCommunicators/GitHubApiCommunicator';
 
 jest.mock('../apiCommunicators/GitHubApiCommunicator');
 
-it('renders a form', () => {
-  const goalsForm = shallow(<GoalsForm />);
+it('renders a form if there is a token', () => {
+  const goalsForm = shallow(<GoalsForm token={'a-token'} />);
 
   expect(goalsForm.find('form').exists()).toEqual(true);
 });
 
-it('handles user input', () => {
+it('renders nothing if there is no token', () => {
   const goalsForm = shallow(<GoalsForm />);
+
+  expect(goalsForm.type()).toEqual(null);
+});
+
+it('handles user input', () => {
+  const goalsForm = shallow(<GoalsForm token={'a-token'} />);
   const input = goalsForm.find('input').at(0);
   const title = 'A Great Title';
 

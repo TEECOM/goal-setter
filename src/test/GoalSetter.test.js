@@ -11,10 +11,11 @@ it('renders Authenticate when not authenticated', () => {
 });
 
 it('renders GoalsForm when authenticated', () => {
+  const token = 'a-token';
+  localStorage.setItem('token', token);
   const goalSetter = shallow(<GoalSetter />);
-  goalSetter.setState({ authenticated: true, token: "anything" });
 
-  expect(goalSetter.contains(<GoalsForm token={"anything"} />)).toEqual(true);
+  expect(goalSetter.contains(<GoalsForm token={token} />)).toEqual(true);
 });
 
 it('fetches the token when code is present', () => {

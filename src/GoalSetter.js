@@ -41,11 +41,14 @@ class GoalSetter extends Component {
     const token = this.state.token;
 
     return(
-      <div id='root'>
-        <Authenticate
-          token={token}
-          logOut={this.logOut}
-          logIn={this.logIn} />
+      <div id='container'>
+        <div className='header'>
+          <h3>Goal Setter</h3>
+          <Authenticate
+            token={token}
+            logOut={this.logOut}
+            logIn={this.logIn} />
+        </div>
         <GoalsForm token={token} />
       </div>
     );

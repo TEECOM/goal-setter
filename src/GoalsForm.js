@@ -24,10 +24,10 @@ class GoalsForm extends Component {
       return (
         <form onSubmit={this.handleSubmit}>
           <label>
-            Title:
-            <input type="text" value={this.state.value} onChange={this.handleChange} />
+            Title
+            <input className="input" type="text" value={this.state.value} onChange={this.handleChange} />
           </label>
-          <input type="submit" value="Submit" />
+          <input className="button" type="submit" value="Submit" />
         </form>
       );
     } else {

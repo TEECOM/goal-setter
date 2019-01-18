@@ -3,10 +3,15 @@ import Authenticate from './Authenticate';
 import GoalsForm from './GoalsForm';
 
 class GoalSetter extends Component {
-  state = { token: localStorage.getItem('token') };
+  state = { token: '' };
 
   componentDidMount() {
-    this.authenticate();
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.setState({ token });
+    } else {
+      this.authenticate();
+    }
   }
 
   authenticate() {
@@ -20,6 +25,7 @@ class GoalSetter extends Component {
         .then(response => response.json())
         .then(({ token }) => {
           localStorage.setItem('token', token);
+          this.setState({ token });
         });
     }
   }

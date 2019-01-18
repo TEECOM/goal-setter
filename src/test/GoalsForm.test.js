@@ -3,18 +3,20 @@ import { shallow } from 'enzyme';
 import GoalsForm from '../GoalsForm';
 import apiCommunicator from '../apiCommunicators/GitHubApiCommunicator';
 
-jest.mock('../apiCommunicators/GitHubApiCommunicator');
+jest.mock('../apiCommunicators/GitHubApiCommunicator', () => ({
+  createMilestone: jest.fn(),
+  fetchMilestones: jest.fn(() => Promise.resolve({
+    data:[
+      {'title': 'A Great Title'},
+      {'title': 'A Greater Title'}
+    ]
+  })),
+}));
 
-it('renders a form if there is a token', () => {
+it('renders a form', () => {
   const goalsForm = shallow(<GoalsForm token={'a-token'} />);
 
   expect(goalsForm.find('form').exists()).toEqual(true);
-});
-
-it('renders nothing if there is no token', () => {
-  const goalsForm = shallow(<GoalsForm />);
-
-  expect(goalsForm.type()).toEqual(null);
 });
 
 it('handles user input', () => {
@@ -24,14 +26,10 @@ it('handles user input', () => {
 
   input.simulate('change', { target: { value: title} })
 
-  expect(goalsForm.state()).toEqual({value: title});
+  expect(goalsForm.state()).toEqual({ value: title, milestones: [] });
 });
 
 it('handles submission', () => {
-  apiCommunicator.mockImplementation(() => {
-    return {createMilestone: jest.fn()};
-  });
-
   const preventDefault = jest.fn();
 
   const token = 'A Great Token';
@@ -42,4 +40,11 @@ it('handles submission', () => {
   goalsForm.find('form').simulate('submit', { preventDefault });
 
   expect(apiCommunicator.createMilestone).toHaveBeenCalledWith(title, token);
+});
+
+it('updates milestones', () => {
+  const token = 'A Great Token';
+  shallow(<GoalsForm token={token} />);
+
+  expect(apiCommunicator.fetchMilestones).toHaveBeenCalledWith(token);
 });

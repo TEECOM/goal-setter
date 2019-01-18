@@ -45,6 +45,9 @@ class GoalSetter extends Component {
 
   render() {
     const token = this.state.token;
+    const renderBody = () => {
+      if (token) { return (<GoalsForm token={token} />); }
+    }
 
     return(
       <div id='container'>
@@ -55,7 +58,7 @@ class GoalSetter extends Component {
             logOut={this.logOut}
             logIn={this.logIn} />
         </div>
-        <GoalsForm token={token} />
+        { renderBody() }
       </div>
     );
   }

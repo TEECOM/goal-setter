@@ -39,7 +39,7 @@ it('handles submission', () => {
   const title = 'A Great Title';
   goalsForm.setState({value: title});
 
-  goalsForm.simulate('submit', { preventDefault });
+  goalsForm.find('form').simulate('submit', { preventDefault });
 
   expect(apiCommunicator.createMilestone).toHaveBeenCalledWith(title, token);
 });

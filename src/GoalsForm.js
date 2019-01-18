@@ -21,14 +21,21 @@ class GoalsForm extends Component {
 
   render() {
     if(this.props.token) {
+      const owner = process.env.REACT_APP_REPO_OWNER;
+      const repo = process.env.REACT_APP_REPO_NAME;
+      const text = `Submit a title to open a milestone in ${owner}'s repo, ${repo}.`;
+
       return (
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Title
-            <input className="input" type="text" value={this.state.value} onChange={this.handleChange} />
-          </label>
-          <input className="button" type="submit" value="Submit" />
-        </form>
+        <div>
+          <p>{text}</p>
+          <form onSubmit={this.handleSubmit}>
+            <label>
+              Title
+              <input className="input" type="text" value={this.state.value} onChange={this.handleChange} />
+            </label>
+            <input className="button" type="submit" value="Submit" />
+          </form>
+        </div>
       );
     } else {
       return null;

@@ -27,11 +27,11 @@ button:hover {
 label {
   display: block;
   font-weight: 600;
-  margin-bottom: 0.6rem;
+  margin-bottom: 3rem;
   font-size: 1.1rem;
 }
 
-input.input {
+.input {
   background: #f7f7f8;
   border: none;
   color: #535b72;

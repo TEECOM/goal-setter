@@ -1,30 +1,52 @@
 import React, { Component } from 'react';
+import MilestoneField from './MilestoneField';
+import IssueField from './IssueField';
+
 import GitHubApiCommunicator from './apiCommunicators/GitHubApiCommunicator';
 
 class GoalsForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { value: '', milestones: [] };
+    this.state = {
+      milestone: {
+        title: ''
+      },
+      issue: {
+        title: '',
+        body: '',
+      },
+    };
   }
 
-  componentDidMount() {
-    const rawMilestones = GitHubApiCommunicator.fetchMilestones(this.props.token);
-
-    rawMilestones
-      .then((result) => {
-        const milestones = result.data.map((milestone) => milestone['title']);
-        this.setState({ milestones });
-      });
+  handleChangeMilestoneTitle = (event) => {
+    const milestone = {...this.state.milestone};
+    milestone.title = event.target.value;
+    this.setState({milestone});
   }
 
-  handleChange = (event) => {
-    this.setState({value: event.target.value});
+  handleChangeIssueTitle = (event) => {
+    const issue = {...this.state.issue};
+    issue.title = event.target.value;
+    this.setState({issue});
+  }
+
+  handleChangeIssueBody = (event) => {
+    const issue = {...this.state.issue};
+    issue.body = event.target.value;
+    this.setState({issue});
   }
 
   handleSubmit = (event)  => {
-    const newMilestones = this.state.milestones.concat(this.state.value)
-    GitHubApiCommunicator.createMilestone(this.state.value, this.props.token);
-    this.setState({ value: '', milestones: newMilestones });
+    GitHubApiCommunicator.submitForm(this.state.milestone, this.state.issue, this.props.token);
+    this.setState({
+      milestone: {
+        title: '',
+      },
+      issue: {
+        title: '',
+        body: '',
+      },
+    });
     event.preventDefault();
   }
 
@@ -33,26 +55,20 @@ class GoalsForm extends Component {
     const repo = process.env.REACT_APP_REPO_NAME;
     const text = `Submit a title to open a milestone in ${owner}'s repo, ${repo}.`;
 
-    const renderMilestones = () => {
-      return(
-        <div>
-          <h4>Open Milestones</h4>
-          { this.state.milestones.map((milestone) => <div key={milestone}>{milestone}</div> )}
-        </div>
-      );
-    }
-
     return (
       <div>
         <p>{text}</p>
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Title
-            <input className="input" type="text" value={this.state.value} onChange={this.handleChange} />
-          </label>
+          <MilestoneField
+            value={this.state.milestone.title}
+            handleChange={this.handleChangeMilestoneTitle} />
+          <IssueField 
+            title={this.state.issue.title}
+            handleChangeTitle={this.handleChangeIssueTitle}
+            body={this.state.issue.body}
+            handleChangeBody={this.handleChangeIssueBody} />
           <input className="button" type="submit" value="Submit" />
         </form>
-        { renderMilestones() }
       </div>
     );
   }

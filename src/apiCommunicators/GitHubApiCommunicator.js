@@ -1,11 +1,13 @@
 import apiCommunicator from './apiCommunicator';
 
 export default class GitHubApiCommunicator {
-  static async submitForm(milestone, issue, token) {
+  static async submitForm(milestone, issues, token) {
     this.createMilestone(milestone, token, (response) => {
       const milestoneNumber = response.data.number;
 
-      this.createIssue(issue, milestoneNumber, token, () => {});
+      issues.forEach((issue) => {
+        this.createIssue(issue, milestoneNumber, token, () => {});
+      });
     });
   }
 

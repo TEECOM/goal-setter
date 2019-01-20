@@ -6,5 +6,5 @@ import IssueField from '../IssueField';
 it('renders a label', () => {
   const issueField = shallow(<IssueField />);
 
-  expect(issueField.find('label').exists()).toEqual(true);
+  expect(issueField.find('section').exists()).toEqual(true);
 });

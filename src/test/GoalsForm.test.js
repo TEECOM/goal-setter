@@ -44,22 +44,33 @@ it('updates the issue title', () => {
   const title = 'A Great Title';
   const goalsForm = shallow(<GoalsForm />);
 
-  goalsForm.instance().handleChangeIssueTitle({
+  goalsForm.instance().handleChangeIssueTitle(0, {
     target: { value: title },
   });
 
-  expect(goalsForm.state().issue.title).toBe(title);
+  expect(goalsForm.state().issues[0].title).toBe(title);
 });
 
 it('updates the issue body', () => {
   const body = 'A Great Body';
   const goalsForm = shallow(<GoalsForm />);
 
-  goalsForm.instance().handleChangeIssueBody({
+  goalsForm.instance().handleChangeIssueBody(0, {
     target: { value: body },
   });
 
-  expect(goalsForm.state().issue.body).toBe(body);
+  expect(goalsForm.state().issues[0].body).toBe(body);
+});
+
+it('adds a new field', () => {
+  const goalsForm = shallow(<GoalsForm />);
+
+  goalsForm.instance().addIssue();
+
+  expect(goalsForm.state().issues).toEqual([
+    {title: '', body: ''},
+    {title: '', body: ''}
+  ]);
 });
 
 it('handles submission', () => {
@@ -68,17 +79,16 @@ it('handles submission', () => {
   const token = 'A Great Token';
   const goalsForm = shallow(<GoalsForm token={token} />);
   const milestone = { title: 'A Great Milestone' };
-  const issue = {
-    title: 'A Great Issue',
-    issueBody: 'The Body of A Great Issue',
-  };
-  goalsForm.setState({ milestone, issue });
+  const issues = [
+    { title: 'A Great Issue', issueBody: 'The Body of A Great Issue' },
+  ];
+  goalsForm.setState({ milestone, issues });
 
   goalsForm.find('form').simulate('submit', { preventDefault });
 
   expect(apiCommunicator.submitForm).toHaveBeenCalledWith(
     milestone,
-    issue,
+    issues,
     token,
   );
 });

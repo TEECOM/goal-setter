@@ -11,11 +11,23 @@ class GoalsForm extends Component {
       milestone: {
         title: ''
       },
-      issue: {
-        title: '',
-        body: '',
-      },
+      issues: [
+        { title: '', body: '' },
+      ],
     };
+  }
+
+  renderIssueFields = () => {
+    return this.state.issues.map((issue, index) => {
+      return (
+        <IssueField 
+          title={issue.title}
+          handleChangeTitle={(e) => this.handleChangeIssueTitle(index, e)}
+          body={issue.body}
+          handleChangeBody={(e) => this.handleChangeIssueBody(index, e)}
+          key={index} />
+      );
+    });
   }
 
   handleChangeMilestoneTitle = (event) => {
@@ -24,28 +36,37 @@ class GoalsForm extends Component {
     this.setState({milestone});
   }
 
-  handleChangeIssueTitle = (event) => {
-    const issue = {...this.state.issue};
+  handleChangeIssueTitle = (index, event) => {
+    const issues = this.state.issues;
+    const issue = this.state.issues[index];
     issue.title = event.target.value;
-    this.setState({issue});
+    issues[index] = issue
+    this.setState({issues});
   }
 
-  handleChangeIssueBody = (event) => {
-    const issue = {...this.state.issue};
+  handleChangeIssueBody = (index, event) => {
+    const issues = this.state.issues;
+    const issue = this.state.issues[index];
     issue.body = event.target.value;
-    this.setState({issue});
+    issues[index] = issue
+    this.setState({issues});
   }
 
-  handleSubmit = (event)  => {
-    GitHubApiCommunicator.submitForm(this.state.milestone, this.state.issue, this.props.token);
+  addIssue = () => {
+    const issues = this.state.issues;
+    issues.push({title: '', body: ''});
+    this.setState(issues);
+  }
+
+  handleSubmit = (event) => {
+    GitHubApiCommunicator.submitForm(this.state.milestone, this.state.issues, this.props.token);
     this.setState({
       milestone: {
         title: '',
       },
-      issue: {
-        title: '',
-        body: '',
-      },
+      issues: [
+        { title: '', body: '' },
+      ],
     });
     event.preventDefault();
   }
@@ -62,12 +83,11 @@ class GoalsForm extends Component {
           <MilestoneField
             value={this.state.milestone.title}
             handleChange={this.handleChangeMilestoneTitle} />
-          <IssueField 
-            title={this.state.issue.title}
-            handleChangeTitle={this.handleChangeIssueTitle}
-            body={this.state.issue.body}
-            handleChangeBody={this.handleChangeIssueBody} />
-          <input className="button" type="submit" value="Submit" />
+          { this.renderIssueFields() }
+          <section className="row">
+            <button className="plus button" type="button" onClick={this.addIssue}>+</button>
+            <input className="button" type="submit" value="Submit" />
+          </section>
         </form>
       </div>
     );

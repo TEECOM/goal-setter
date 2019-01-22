@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import MilestoneField from './MilestoneField';
 import IssueField from './IssueField';
 
-import GitHubApiCommunicator from './apiCommunicators/GitHubApiCommunicator';
+import gitHubApiCommunicator from './apiCommunicators/gitHubApiCommunicator';
 
 class GoalsForm extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       milestone: {
         title: ''
@@ -14,6 +15,7 @@ class GoalsForm extends Component {
       issues: [
         { title: '', body: '' },
       ],
+      docText: '',
     };
   }
 
@@ -33,7 +35,7 @@ class GoalsForm extends Component {
   handleChangeMilestoneTitle = (event) => {
     const milestone = {...this.state.milestone};
     milestone.title = event.target.value;
-    this.setState({milestone});
+    this.setState({milestone}, this.updateDoc);
   }
 
   handleChangeIssueTitle = (index, event) => {
@@ -41,7 +43,7 @@ class GoalsForm extends Component {
     const issue = this.state.issues[index];
     issue.title = event.target.value;
     issues[index] = issue
-    this.setState({issues});
+    this.setState({issues}, this.updateDoc);
   }
 
   handleChangeIssueBody = (index, event) => {
@@ -49,17 +51,18 @@ class GoalsForm extends Component {
     const issue = this.state.issues[index];
     issue.body = event.target.value;
     issues[index] = issue
-    this.setState({issues});
+    this.setState({issues}, this.updateDoc);
   }
 
   addIssue = () => {
     const issues = this.state.issues;
     issues.push({title: '', body: ''});
-    this.setState(issues);
+    this.setState(issues, this.updateDoc);
   }
 
   handleSubmit = (event) => {
-    GitHubApiCommunicator.submitForm(this.state.milestone, this.state.issues, this.props.token);
+    gitHubApiCommunicator.submitForm(this.state, this.props.token);
+
     this.setState({
       milestone: {
         title: '',
@@ -67,14 +70,49 @@ class GoalsForm extends Component {
       issues: [
         { title: '', body: '' },
       ],
+      docText: '',
     });
     event.preventDefault();
+  }
+
+  updateDoc = (event) => {
+    const milestoneTitle = this.state.milestone.title;
+    const owner = process.env.REACT_APP_REPO_OWNER;
+    const repo = process.env.REACT_APP_REPO_NAME;
+    
+    let result = '';
+
+    if (milestoneTitle) {
+      result = result.concat(`# [${milestoneTitle}](https://github.com/${owner}/${repo}/milestone/1)\n\n`);
+    }
+
+    this.state.issues.forEach((issue) => {
+      if (issue.title !== '') {
+        result = result.concat(`## [${issue.title}](https://github.com/${owner}/${repo}/issues/1)\n\n`)
+
+        if (issue.body !== '') {
+          result = result.concat(`${issue.body}\n\n`)
+        }
+      }
+    });
+
+    if (event) {
+      result = result.concat(event.target.value);
+    }
+
+    this.setState({docText: result});
+  }
+
+  updateDocDirectly = (event) => {
+    this.setState({docText: event.target.value});
   }
 
   render() {
     const owner = process.env.REACT_APP_REPO_OWNER;
     const repo = process.env.REACT_APP_REPO_NAME;
     const text = `Submit a title to open a milestone in ${owner}'s repo, ${repo}.`;
+
+    const filepath = process.env.REACT_APP_REPO_NAME + " / doc / goals / 2019-q1.md"
 
     return (
       <div>
@@ -89,6 +127,10 @@ class GoalsForm extends Component {
             <input className="button" type="submit" value="Submit" />
           </section>
         </form>
+        <section className="doc">
+          { filepath }
+          <textarea className="doc input" rows="5" onChange={this.updateDocDirectly} value={this.state.docText} />
+        </section>
       </div>
     );
   }

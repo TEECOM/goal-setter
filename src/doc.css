@@ -1,0 +1,8 @@
+.doc {
+  font-family: monospace;
+}
+
+.doc.input {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

@@ -46,7 +46,7 @@ class GoalSetter extends Component {
   render() {
     const token = this.state.token;
     const renderBody = () => {
-      if (token) { return (<GoalsForm token={token} />); }
+      if (token) { return <GoalsForm token={token} /> }
     }
 
     return(

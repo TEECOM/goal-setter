@@ -5,9 +5,9 @@ import GoalsForm from '../GoalsForm';
 import MilestoneField from '../MilestoneField';
 import IssueField from '../IssueField';
 
-import apiCommunicator from '../apiCommunicators/GitHubApiCommunicator';
+import apiCommunicator from '../apiCommunicators/gitHubApiCommunicator';
 
-jest.mock('../apiCommunicators/GitHubApiCommunicator', () => ({
+jest.mock('../apiCommunicators/gitHubApiCommunicator', () => ({
   submitForm: jest.fn(),
 }));
 
@@ -82,13 +82,18 @@ it('handles submission', () => {
   const issues = [
     { title: 'A Great Issue', issueBody: 'The Body of A Great Issue' },
   ];
-  goalsForm.setState({ milestone, issues });
+  const docText = 'A great Text';
+  const data = {
+    milestone,
+    issues,
+    docText,
+  }
+  goalsForm.setState({ milestone, issues, docText });
 
   goalsForm.find('form').simulate('submit', { preventDefault });
 
   expect(apiCommunicator.submitForm).toHaveBeenCalledWith(
-    milestone,
-    issues,
+    data,
     token,
   );
 });

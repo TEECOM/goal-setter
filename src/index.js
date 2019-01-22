@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import GoalSetter from './GoalSetter';
+import './doc.css';
 import './index.css';
 import './issue.css';
 import './typography.css';

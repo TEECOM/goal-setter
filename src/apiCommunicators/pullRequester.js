@@ -70,7 +70,7 @@ export default class pullRequester {
       "base_tree": parentSha,
       "tree": [
         {
-          "path": `${this.formattedMilestone}.md`,
+          "path": `docs/goals/${this.formattedMilestone}.md`,
           "mode": "100644",
           "type": "blob",
           "sha": newSha,

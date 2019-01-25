@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import MilestoneField from './MilestoneField';
 import IssueField from './IssueField';
+import DocField from './DocField';
 
 import gitHubApiCommunicator from './apiCommunicators/gitHubApiCommunicator';
+import docUpdater from './models/docUpdater';
 
 class GoalsForm extends Component {
   constructor(props) {
@@ -16,7 +18,25 @@ class GoalsForm extends Component {
         { title: '', body: '' },
       ],
       docText: '',
+      milestoneNumber: 1,
+      issueNumber: 1,
     };
+  }
+
+  componentDidMount() {
+    gitHubApiCommunicator.getMilestonesAndIssues(
+      this.props.token,
+      (i, m) => this.setMilestoneAndIssueNumbers(i, m)
+    );
+  }
+
+  setMilestoneAndIssueNumbers(issues, milestones) {
+    let { milestoneNumber, issueNumber } = this.state;
+
+    this.setState({
+      milestoneNumber: docUpdater.extractNumber(milestones) || milestoneNumber,
+      issueNumber: docUpdater.extractNumber(issues) || issueNumber,
+    });
   }
 
   renderIssueFields = () => {
@@ -76,29 +96,7 @@ class GoalsForm extends Component {
   }
 
   updateDoc = (event) => {
-    const milestoneTitle = this.state.milestone.title;
-    const owner = process.env.REACT_APP_REPO_OWNER;
-    const repo = process.env.REACT_APP_REPO_NAME;
-    
-    let result = '';
-
-    if (milestoneTitle) {
-      result = result.concat(`# [${milestoneTitle}](https://github.com/${owner}/${repo}/milestone/1)\n\n`);
-    }
-
-    this.state.issues.forEach((issue) => {
-      if (issue.title !== '') {
-        result = result.concat(`## [${issue.title}](https://github.com/${owner}/${repo}/issues/1)\n\n`)
-
-        if (issue.body !== '') {
-          result = result.concat(`${issue.body}\n\n`)
-        }
-      }
-    });
-
-    if (event) {
-      result = result.concat(event.target.value);
-    }
+    const result = docUpdater.update(this.state, event, this.props.token)
 
     this.setState({docText: result});
   }
@@ -110,8 +108,6 @@ class GoalsForm extends Component {
   render() {
     const owner = process.env.REACT_APP_REPO_OWNER;
     const repo = process.env.REACT_APP_REPO_NAME;
-
-    const filepath = process.env.REACT_APP_REPO_NAME + " / doc / goals / 2019-q1.md"
 
     return (
       <div>
@@ -126,10 +122,7 @@ class GoalsForm extends Component {
           <section className="row">
             <button className="plus button" type="button" onClick={this.addIssue}>+</button>
           </section>
-          <section className="doc">
-            <div>{ filepath }</div>
-            <textarea className="doc input" rows="10" onChange={this.updateDocDirectly} value={this.state.docText} />
-          </section>
+          <DocField docText={this.state.docText} updateDocDirectly={this.updateDocDirectly} />
           <section>
             <input className="button" type="submit" value="Submit" />
           </section>

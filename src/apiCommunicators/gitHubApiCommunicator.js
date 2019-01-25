@@ -40,4 +40,18 @@ export default class gitHubApiCommunicator {
       () => {},
     );
   }
+
+  static async getMilestonesAndIssues(token, success) {
+    apiCommunicator.get(
+      '/repos/:owner/:repo/milestones',
+      token,
+      (milestones) => {
+        apiCommunicator.get(
+          '/repos/:owner/:repo/issues',
+          token,
+          (issues) => success(issues, milestones),
+        );
+      },
+    );
+  }
 }

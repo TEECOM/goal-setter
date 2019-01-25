@@ -8,7 +8,9 @@ export default class apiCommunicator {
         headers: { authorization: `token ${token}` },
         owner: process.env.REACT_APP_REPO_OWNER,
         repo: process.env.REACT_APP_REPO_NAME,
-        ref: 'heads/master'
+        ref: 'heads/master',
+        direction: 'desc',
+        state: 'all',
       },
     ))
   }

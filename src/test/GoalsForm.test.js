@@ -1,14 +1,16 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import GoalsForm from '../GoalsForm';
 import MilestoneField from '../MilestoneField';
 import IssueField from '../IssueField';
+import DocField from '../DocField';
 
 import apiCommunicator from '../apiCommunicators/gitHubApiCommunicator';
 
 jest.mock('../apiCommunicators/gitHubApiCommunicator', () => ({
   submitForm: jest.fn(),
+  getMilestonesAndIssues: jest.fn(),
 }));
 
 it('renders a form', () => {
@@ -29,6 +31,27 @@ it('renders an issue field', () => {
   expect(goalsForm.find(IssueField).exists()).toEqual(true);
 });
 
+it('gets milestones and issues upon mount', () => {
+  const token = 'a-token';
+  shallow(<GoalsForm token={token}/>);
+
+  expect(apiCommunicator.getMilestonesAndIssues).toHaveBeenCalledWith(
+    token,
+    expect.any(Function),
+  );
+});
+
+it('sets milestone and issue numbers', () => {
+  const issues = { data: [{ number: 19 }] };
+  const milestones = { data: [{ number: 1 }] };
+  const goalsForm = shallow(<GoalsForm />);
+  
+  goalsForm.instance().setMilestoneAndIssueNumbers(issues, milestones);
+
+  expect(goalsForm.state().milestoneNumber).toEqual(2);
+  expect(goalsForm.state().issueNumber).toEqual(20);
+});
+
 it('updates the milestone title', () => {
   const title = 'A Great Title';
   const goalsForm = shallow(<GoalsForm />);
@@ -42,24 +65,33 @@ it('updates the milestone title', () => {
 
 it('updates the issue title', () => {
   const title = 'A Great Title';
-  const goalsForm = shallow(<GoalsForm />);
+  const newTitle = 'A Greater Title';
+  const goalsForm = mount(<GoalsForm />);
+  goalsForm.setState({ issues: [{ title: title }] });
 
-  goalsForm.instance().handleChangeIssueTitle(0, {
-    target: { value: title },
+  const issueField = goalsForm.find(IssueField).at(0);
+  issueField.props().handleChangeTitle({
+    target: { value: newTitle },
   });
 
-  expect(goalsForm.state().issues[0].title).toBe(title);
+  expect(goalsForm.state().issues[0].title).toBe(newTitle);
 });
 
 it('updates the issue body', () => {
   const body = 'A Great Body';
-  const goalsForm = shallow(<GoalsForm />);
+  const newBody = 'A Greater Body';
+  const goalsForm = mount(<GoalsForm />);
+  goalsForm.setState({ issues: [{
+    title: 'A Title',
+    body: body
+  }] });
 
-  goalsForm.instance().handleChangeIssueBody(0, {
-    target: { value: body },
+  const issueField = goalsForm.find(IssueField).at(0);
+  issueField.props().handleChangeBody({
+    target: { value: newBody },
   });
 
-  expect(goalsForm.state().issues[0].body).toBe(body);
+  expect(goalsForm.state().issues[0].body).toBe(newBody);
 });
 
 it('adds a new field', () => {
@@ -71,6 +103,18 @@ it('adds a new field', () => {
     {title: '', body: ''},
     {title: '', body: ''}
   ]);
+});
+
+it('updates the doc directly', () => {
+  const docText = "A Great Doc";
+  const goalsForm = mount(<GoalsForm />);
+  const docField = goalsForm.find(DocField).at(0);
+
+  docField.props().updateDocDirectly({
+    target: { value: docText },
+  });
+
+  expect(goalsForm.state().docText).toBe(docText);
 });
 
 it('handles submission', () => {
@@ -87,6 +131,8 @@ it('handles submission', () => {
     milestone,
     issues,
     docText,
+    milestoneNumber: 1,
+    issueNumber: 1,
   }
   goalsForm.setState({ milestone, issues, docText });
 

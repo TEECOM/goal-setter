@@ -110,13 +110,14 @@ class GoalsForm extends Component {
   render() {
     const owner = process.env.REACT_APP_REPO_OWNER;
     const repo = process.env.REACT_APP_REPO_NAME;
-    const text = `Submit a title to open a milestone in ${owner}'s repo, ${repo}.`;
 
     const filepath = process.env.REACT_APP_REPO_NAME + " / doc / goals / 2019-q1.md"
 
     return (
       <div>
-        <p>{text}</p>
+        <a href={"https://github.com/" + owner + "/" + repo} className="repo-name">
+          {owner}/{repo}
+        </a>
         <form onSubmit={this.handleSubmit}>
           <MilestoneField
             value={this.state.milestone.title}
@@ -126,8 +127,8 @@ class GoalsForm extends Component {
             <button className="plus button" type="button" onClick={this.addIssue}>+</button>
           </section>
           <section className="doc">
-            { filepath }
-            <textarea className="doc input" rows="5" onChange={this.updateDocDirectly} value={this.state.docText} />
+            <div>{ filepath }</div>
+            <textarea className="doc input" rows="10" onChange={this.updateDocDirectly} value={this.state.docText} />
           </section>
           <section>
             <input className="button" type="submit" value="Submit" />

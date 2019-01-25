@@ -4,8 +4,7 @@ class MilestoneField extends Component {
   render() {
     return(
       <section>
-        Milestone Title
-        <input className="input" type="text" value={this.props.value} onChange={this.props.handleChange} />
+        <input className="input" type="text" placeholder="Milestone Title" value={this.props.value} onChange={this.props.handleChange} />
       </section>
     );
   }

@@ -4,10 +4,8 @@ class IssueField extends Component {
   render() {
     return(
       <section className="issue">
-        Issue Title
-        <input className="input" type="text" value={this.props.title} onChange={this.props.handleChangeTitle} />
-        Issue Body
-        <textarea className="input" rows="3" value={this.props.body} onChange={this.props.handleChangeBody} />
+        <input className="input" type="text" placeholder="Issue Title" value={this.props.title} onChange={this.props.handleChangeTitle} />
+        <textarea className="input" rows="3" placeholder="Issue Body" value={this.props.body} onChange={this.props.handleChangeBody} />
       </section>
     );
   }

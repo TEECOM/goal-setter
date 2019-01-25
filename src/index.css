@@ -75,3 +75,17 @@ section.row {
   line-height: 1rem;
   padding-bottom: 1.5rem;
 }
+
+.plus:hover {
+  background-color: #ffd687;
+  transition: 0.3s;
+}
+
+.repo-name {
+  font-family: monospace;
+  color: black;
+  margin: 1rem 0;
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}

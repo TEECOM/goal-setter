@@ -51,6 +51,11 @@ input.button {
   padding: 1rem;
 }
 
+input.button:hover {
+  background-color: #ffd687;
+  transition: 0.3s;
+}
+
 section {
   display: flex;
   flex-flow: column;

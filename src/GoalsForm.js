@@ -124,12 +124,14 @@ class GoalsForm extends Component {
           { this.renderIssueFields() }
           <section className="row">
             <button className="plus button" type="button" onClick={this.addIssue}>+</button>
-            <input className="button" type="submit" value="Submit" />
           </section>
         </form>
         <section className="doc">
           { filepath }
           <textarea className="doc input" rows="5" onChange={this.updateDocDirectly} value={this.state.docText} />
+        </section>
+        <section>
+          <input className="button" type="submit" value="Submit" />
         </section>
       </div>
     );

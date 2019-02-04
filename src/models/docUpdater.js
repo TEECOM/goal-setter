@@ -1,10 +1,18 @@
 export default class docUpdater {
-  static update({ milestone, issues, milestoneNumber, issueNumber }, event, token) {
+  static update(state, event, token) {
+    const {
+      currentRepo,
+      milestone,
+      issues,
+      milestoneNumber,
+      issueNumber,
+    } = state;
+
     if (event) return event.target.value;
 
     const milestoneTitle = milestone.title;
-    const owner = process.env.REACT_APP_REPO_OWNER;
-    const repo = process.env.REACT_APP_REPO_NAME;
+    const owner = currentRepo.owner.login;
+    const repo = currentRepo.name;
     
     let result = '';
 
@@ -31,9 +39,9 @@ export default class docUpdater {
     return result;
   }
 
-  static extractNumber(response) {
-    if (response.data[0]) {
-      return response.data[0].number + 1;
+  static extractNumber(data) {
+    if (data[0]) {
+      return data[0].number + 1;
     }
 
     return null;

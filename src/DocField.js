@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 class DocField extends Component {
   render() {
-    const filepath = process.env.REACT_APP_REPO_NAME + 
+    const filepath = this.props.repoName + 
       " / doc / goals / 2019-q1.md"
 
     return (

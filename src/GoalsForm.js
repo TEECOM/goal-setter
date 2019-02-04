@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import MilestoneField from './MilestoneField';
 import IssueField from './IssueField';
 import DocField from './DocField';
+import RepoSelector from './RepoSelector';
 
 import gitHubApiCommunicator from './apiCommunicators/gitHubApiCommunicator';
 import docUpdater from './models/docUpdater';
@@ -11,8 +12,12 @@ class GoalsForm extends Component {
     super(props);
 
     this.state = {
+      repos: [],
+      currentRepo: {
+        name: '',
+      },
       milestone: {
-        title: ''
+        title: '',
       },
       issues: [
         { title: '', body: '' },
@@ -24,18 +29,46 @@ class GoalsForm extends Component {
   }
 
   componentDidMount() {
-    gitHubApiCommunicator.getMilestonesAndIssues(
-      this.props.token,
-      (i, m) => this.setMilestoneAndIssueNumbers(i, m)
-    );
+    this.getRepos()
+      .then(repoData => this.setRepos(repoData))
+      .then(repo => this.getMilestonesAndIssues(repo))
+      .then(response => this.setMilestoneAndIssueNumbers(response))
   }
 
-  setMilestoneAndIssueNumbers(issues, milestones) {
+  getRepos() {
+    return gitHubApiCommunicator.getRepos(this.props.token);
+  }
+
+  setRepos(repoData) {
+    const repos = repoData.data.map((repo) => {
+      return { name: repo.name, owner: repo.owner.login }
+    })
+    const currentRepo = repos[0];
+
+    this.setState({ repos, currentRepo });
+
+    return currentRepo;
+  }
+
+  getMilestonesAndIssues(repo) {
+    return gitHubApiCommunicator.getMilestonesAndIssues(
+      this.props.token,
+      { owner: repo.owner, repo: repo.name },
+    )
+  }
+
+  setMilestoneAndIssueNumbers({ issues, milestones }) {
     let { milestoneNumber, issueNumber } = this.state;
 
     this.setState({
       milestoneNumber: docUpdater.extractNumber(milestones) || milestoneNumber,
       issueNumber: docUpdater.extractNumber(issues) || issueNumber,
+    });
+  }
+
+  buildRepoNames = () => {
+    return this.state.repos.map((repo) => {
+      return `${repo.owner}/${repo.name}`
     });
   }
 
@@ -50,6 +83,12 @@ class GoalsForm extends Component {
           key={index} />
       );
     });
+  }
+
+  handleChangeRepo = (event) => {
+    this.setState({
+      currentRepo: this.state.repos[parseInt(event.target.value)]
+    })
   }
 
   handleChangeMilestoneTitle = (event) => {
@@ -106,14 +145,11 @@ class GoalsForm extends Component {
   }
 
   render() {
-    const owner = process.env.REACT_APP_REPO_OWNER;
-    const repo = process.env.REACT_APP_REPO_NAME;
-
     return (
       <div>
-        <a href={"https://github.com/" + owner + "/" + repo} className="repo-name">
-          {owner}/{repo}
-        </a>
+        <RepoSelector
+          repoNames={this.buildRepoNames()}
+          handleChange={this.handleChangeRepo} />
         <form onSubmit={this.handleSubmit}>
           <MilestoneField
             value={this.state.milestone.title}
@@ -122,7 +158,10 @@ class GoalsForm extends Component {
           <section className="row">
             <button className="plus button" type="button" onClick={this.addIssue}>+</button>
           </section>
-          <DocField docText={this.state.docText} updateDocDirectly={this.updateDocDirectly} />
+          <DocField
+            docText={this.state.docText}
+            repoName={this.state.currentRepo.name}
+            updateDocDirectly={this.updateDocDirectly} />
           <section>
             <input className="button" type="submit" value="Submit" />
           </section>

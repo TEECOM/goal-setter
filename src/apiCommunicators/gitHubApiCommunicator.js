@@ -2,21 +2,31 @@ import apiCommunicator from './apiCommunicator';
 import pullRequester from './pullRequester';
 
 export default class gitHubApiCommunicator {
-  static submitForm(formData, token) {
-    const milestone = formData.milestone;
+  static getRepos(token) {
+    return apiCommunicator.get('/user/repos', token, {});
+  }
 
+  static submitForm(formData, token) {
     this.createMilestone(
-      milestone,
+      formData,
       token,
       (response) => this.createIssues(formData, token, response)
     );
   }
 
-  static async createMilestone({ title }, token, success) {
+  static async createMilestone(formData, token, success) {
+    const params = {
+      data: {
+        title: formData.milestone.title
+      },
+      owner: formData.currentRepo.owner,
+      repo: formData.currentRepo.name
+    }
+
     apiCommunicator.post(
       '/repos/:owner/:repo/milestones',
       token,
-      { title: title },
+      params,
       success,
     );
   }
@@ -24,34 +34,48 @@ export default class gitHubApiCommunicator {
   static async createIssues(formData, token, response) {
     const issues = formData.issues;
     const milestoneNumber = response.data.number;
+    const { owner, name } = formData.currentRepo;
 
     issues.forEach((issue) => {
-      this.createIssue(issue, milestoneNumber, token);
+      const params = {
+        data: {
+          ...issue,
+          milestone: milestoneNumber
+        },
+        owner,
+        repo: name
+      }
+
+      this.createIssue(params, token);
     });
 
-    new pullRequester(formData, token).openPullRequest();
+    new pullRequester({ ...formData, owner, name }, token).openPullRequest();
   }
 
-  static async createIssue(issue, milestoneNumber, token) {
+  static async createIssue(params, token) {
     apiCommunicator.post(
       '/repos/:owner/:repo/issues',
       token,
-      { ...issue, milestone: milestoneNumber },
+      params,
       () => {},
     );
   }
 
-  static async getMilestonesAndIssues(token, success) {
-    apiCommunicator.get(
+  static async getMilestonesAndIssues(token, params) {
+    const milestones = apiCommunicator.get(
       '/repos/:owner/:repo/milestones',
       token,
-      (milestones) => {
-        apiCommunicator.get(
-          '/repos/:owner/:repo/issues',
-          token,
-          (issues) => success(issues, milestones),
-        );
-      },
-    );
+      params,
+    )
+    const issues = apiCommunicator.get(
+      '/repos/:owner/:repo/issues',
+      token,
+      params,
+    )
+
+    milestones.then(issues)
+    return Promise.all([milestones, issues]).then(([milestones, issues]) => {
+      return { milestones: milestones.data, issues: issues.data }
+    })
   }
 }

@@ -1,130 +1,162 @@
 import apiCommunicator from './apiCommunicator';
 
 export default class pullRequester {
-  constructor({ milestone, issues, docText }, token) {
+  constructor({ milestone, issues, docText, owner, name }, token) {
     this.baseUrl = '/repos/:owner/:repo';
     this.issues = issues;
     this.milestone = milestone.title;
     this.formattedMilestone = this.milestone.replace(/\s+/g, '-').toLowerCase();
     this.token = token;
     this.docText = docText;
+    this.owner = owner;
+    this.repoName = name;
   }
 
   openPullRequest() {
-    apiCommunicator.get(
-      this.baseUrl + '/git/refs/:ref',
-      this.token,
-      (response) => this.createReference(response)
-    );
+    const params = {
+      owner: this.owner,
+      repo: this.repoName
+    }
+
+    apiCommunicator.get(this.baseUrl + '/git/refs/:ref', this.token, params)
+      .then(response => this.createReference(response))
   }
 
   createReference(response) {
     const masterSha = response.data.object.sha;
-    const data = {
-      sha: masterSha,
-      ref: `refs/heads/${this.formattedMilestone}`,
-    };
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: {
+        sha: masterSha,
+        ref: `refs/heads/${this.formattedMilestone}`,
+      }
+    }
 
     apiCommunicator.post(
       this.baseUrl + '/git/refs',
       this.token,
-      data,
+      params,
       (response) =>  this.getReferenceTree(response)
     );
   }
-      
+
   getReferenceTree(response) {
+    const params = {
+      owner: this.owner,
+      repo: this.repoName
+    }
+
     const url = response.data.object.url;
 
-    apiCommunicator.get(
-      url,
-      this.token,
-      (response) => this.postDocument(response)
-    );
+    apiCommunicator.get(url, this.token, params)
+      .then(response => this.postDocument(response))
   }
       
   postDocument(response) {
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: { content: this.docText }
+    }
+
     const documentResponse = response.data;
-    const data = { content: this.docText };
 
     apiCommunicator.post(
       this.baseUrl + '/git/blobs',
       this.token,
-      data,
+      params,
       (response) => this.getNewTree(response, documentResponse)
     );
   }
       
   getNewTree(response, { sha, tree }) {
+    const params = {
+      owner: this.owner,
+      repo: this.repoName
+    }
     const newSha = response.data.sha;
 
-    apiCommunicator.get(
-      tree.url,
-      this.token,
-      () => this.postNewSha(sha, newSha),
-    );
+    apiCommunicator.get(tree.url, this.token, params)
+      .then(() => this.postNewSha(sha, newSha))
   }
 
   postNewSha(parentSha, newSha) {
-    const data = {
-      "base_tree": parentSha,
-      "tree": [
-        {
-          "path": `docs/goals/${this.formattedMilestone}.md`,
-          "mode": "100644",
-          "type": "blob",
-          "sha": newSha,
-        }
-      ]
-    };
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: {
+        "base_tree": parentSha,
+        "tree": [
+          {
+            "path": `docs/goals/${this.formattedMilestone}.md`,
+            "mode": "100644",
+            "type": "blob",
+            "sha": newSha,
+          }
+        ]
+      }
+    }
 
     apiCommunicator.post(
       this.baseUrl + '/git/trees',
       this.token,
-      data,
+      params,
       (response) => this.postCommit(response, parentSha),
     );
   }
       
   postCommit(response, parentSha) {
     const treeSha = response.data.sha
-    const data = {
-      message: this.formattedMilestone,
-      tree: treeSha,
-      parents: [parentSha],
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: {
+        message: this.formattedMilestone,
+        tree: treeSha,
+        parents: [parentSha],
+      }
     }
 
     apiCommunicator.post(
       this.baseUrl + '/git/commits',
       this.token,
-      data,
+      params,
       (response) => this.reassignHead(response),
     );
   }
 
   reassignHead(response) {
     const newSha = response.data.sha;
-    const data = { sha: newSha }
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: { sha: newSha }
+    }
 
     apiCommunicator.patch(
       this.baseUrl + '/git/refs/heads/' + this.formattedMilestone,
       this.token,
-      data,
+      params,
       (response) => this.actuallyOpenPullRequest(response),
     );
   }
 
   actuallyOpenPullRequest(response) {
-    const data = {
-      title: this.milestone,
-      head: this.formattedMilestone,
-      base: 'master',
+    const params = {
+      owner: this.owner,
+      repo: this.repoName,
+      data: {
+        title: this.milestone,
+        head: this.formattedMilestone,
+        base: 'master',
+      }
     }
 
     apiCommunicator.post(
       this.baseUrl + '/pulls',
       this.token,
-      data,
+      params,
       () => {}
     );
   }

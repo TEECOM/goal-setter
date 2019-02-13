@@ -1,7 +1,8 @@
 import apiCommunicator from './apiCommunicator';
 
 export default class pullRequester {
-  constructor({ milestone, issues, docText, owner, name }, token) {
+  constructor(formData, token) {
+    const { milestone, issues, docText, owner, name, currentRepo } = formData;
     this.baseUrl = '/repos/:owner/:repo';
     this.issues = issues;
     this.milestone = milestone.title;
@@ -10,6 +11,7 @@ export default class pullRequester {
     this.docText = docText;
     this.owner = owner;
     this.repoName = name;
+    this.baseBranch = currentRepo.baseBranch;
   }
 
   openPullRequest() {
@@ -149,7 +151,7 @@ export default class pullRequester {
       data: {
         title: this.milestone,
         head: this.formattedMilestone,
-        base: 'master',
+        base: this.baseBranch,
       }
     }
 

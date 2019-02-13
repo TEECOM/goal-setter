@@ -41,7 +41,11 @@ class GoalsForm extends Component {
 
   setRepos(repoData) {
     const repos = repoData.data.map((repo) => {
-      return { name: repo.name, owner: repo.owner.login }
+      return {
+        name: repo.name,
+        owner: repo.owner.login,
+        baseBranch: repo.default_branch,
+      }
     })
     const currentRepo = repos[0];
 

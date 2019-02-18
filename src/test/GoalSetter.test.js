@@ -32,7 +32,6 @@ it('passes correct props to Authenticate', () => {
 });
 
 it('fetches the token when code is present', () => {
-  process.env.REACT_APP_GATEKEEPER_URI = 'anything.com'
   window.history.pushState({}, 'Anything', '/?code=123');
 
   const mockSuccessResponse = {};

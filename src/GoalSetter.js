@@ -15,7 +15,7 @@ class GoalSetter extends Component {
   }
 
   authenticate() {
-    const gatekeeperURI = process.env.REACT_APP_GATEKEEPER_URI
+    const gatekeeperURI = "https://goal-setter-gatekeeper-dev.herokuapp.com" 
     const code =
       window.location.href.match(/\?code=(.*)/) &&
       window.location.href.match(/\?code=(.*)/)[1];
@@ -31,8 +31,8 @@ class GoalSetter extends Component {
   }
 
   logIn = () => {
-    const CLIENT_ID = process.env.REACT_APP_OAUTH_CLIENT_ID;
-    const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
+    const CLIENT_ID = "01a650ddb17e80a6d1a8";
+    const REDIRECT_URI = "http://localhost:3000";
 
     window.location.replace(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo,user&redirect_uri=${REDIRECT_URI}`)
     this.authenticate();

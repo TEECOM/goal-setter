@@ -40,10 +40,8 @@ in a terminal session.
 Node.js is a JavaScript runtime. If you do not already have Node.js installed,
 you can download it [here](https://nodejs.org/en/).
 
-#### npm
-
-npm is a package manager for JavaScript. If you've installed Node.js, npm came
-along with it.
+If you already have Node.js installed, be sure to use a version greater than
+8.9.0.
 
 #### Yarn
 
@@ -69,6 +67,14 @@ yarn
 This should install all of the remaining dependencies. If something goes wrong,
 please [open an issue](https://github.com/TEECOM/goal-setter/issues/new).
 
+### Running it locally
+
+To run Goal Setter on your local server, use the following command:
+
+```
+yarn start
+```
+
 ## Running the tests
 
 Goal Setter strives to be 100% tested to protect against regressions and to
@@ -77,13 +83,13 @@ guide development.
 To run the full suite of tests, run:
 
 ```
-npm test
+yarn test
 ```
 
 To ensure 100% test coverage, you can also run:
 
 ```
-npm test -- --coverage
+yarn test --coverage
 ```
 
 ## Running the style checker
@@ -93,7 +99,7 @@ Goal Setter uses [ESLint](https://eslint.org/).
 To run the code checker, run:
 
 ```
-npm run lint
+yarn lint
 ```
 
 ## Deployment

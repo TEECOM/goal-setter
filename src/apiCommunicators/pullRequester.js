@@ -39,8 +39,7 @@ export default class pullRequester {
       this.baseUrl + '/git/refs',
       this.token,
       params,
-      (response) =>  this.getReferenceTree(response)
-    );
+    ).then(response => this.getReferenceTree(response));
   }
 
   getReferenceTree(response) {
@@ -52,7 +51,7 @@ export default class pullRequester {
     const url = response.data.object.url;
 
     apiCommunicator.get(url, this.token, params)
-      .then(response => this.postDocument(response))
+      .then(response => this.postDocument(response));
   }
       
   postDocument(response) {
@@ -68,8 +67,9 @@ export default class pullRequester {
       this.baseUrl + '/git/blobs',
       this.token,
       params,
-      (response) => this.getNewTree(response, documentResponse)
-    );
+    ).then(
+      response => this.getNewTree(response, documentResponse)
+    )
   }
       
   getNewTree(response, { sha, tree }) {
@@ -104,8 +104,9 @@ export default class pullRequester {
       this.baseUrl + '/git/trees',
       this.token,
       params,
-      (response) => this.postCommit(response, parentSha),
-    );
+    ).then(
+      response => this.postCommit(response, parentSha)
+    )
   }
       
   postCommit(response, parentSha) {
@@ -124,8 +125,7 @@ export default class pullRequester {
       this.baseUrl + '/git/commits',
       this.token,
       params,
-      (response) => this.reassignHead(response),
-    );
+    ).then(response => this.reassignHead(response))
   }
 
   reassignHead(response) {
@@ -140,8 +140,7 @@ export default class pullRequester {
       this.baseUrl + '/git/refs/heads/' + this.formattedMilestone,
       this.token,
       params,
-      (response) => this.actuallyOpenPullRequest(response),
-    );
+    ).then(response => this.actuallyOpenPullRequest(response))
   }
 
   actuallyOpenPullRequest(response) {
@@ -159,7 +158,6 @@ export default class pullRequester {
       this.baseUrl + '/pulls',
       this.token,
       params,
-      () => {}
     );
   }
 }

@@ -20,22 +20,22 @@ export default class apiCommunicator {
     ))
   }
 
-  static async post(url, token, params, success) {
+  static async post(url, token, params) {
     const { owner, repo, data } = params;
     const headers = { authorization: `token ${token}` };
 
-    success(await request(
+    return (await request(
       'POST ' + url,
       { headers, owner, repo, data },
     ));
   }
 
-  static async patch(url, token, params, success) {
+  static async patch(url, token, params) {
     const { owner, repo, data } = params;
     const headers = { authorization: `token ${token}` };
     const ref = 'heads/master';
 
-    success(await request(
+    return (await request(
       'PATCH ' + url,
       { headers, owner, repo, ref, data },
     ));

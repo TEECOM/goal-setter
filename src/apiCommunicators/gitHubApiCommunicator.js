@@ -9,12 +9,13 @@ export default class gitHubApiCommunicator {
   static submitForm(formData, token) {
     this.createMilestone(
       formData,
-      token,
-      (response) => this.createIssues(formData, token, response)
-    );
+      token
+    ).then(
+      response => this.createIssues(formData, token, response)
+    )
   }
 
-  static async createMilestone(formData, token, success) {
+  static async createMilestone(formData, token) {
     const params = {
       data: {
         title: formData.milestone.title
@@ -23,11 +24,10 @@ export default class gitHubApiCommunicator {
       repo: formData.currentRepo.name
     }
 
-    apiCommunicator.post(
+    return apiCommunicator.post(
       '/repos/:owner/:repo/milestones',
       token,
       params,
-      success,
     );
   }
 
@@ -57,7 +57,6 @@ export default class gitHubApiCommunicator {
       '/repos/:owner/:repo/issues',
       token,
       params,
-      () => {},
     );
   }
 

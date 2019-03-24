@@ -11,7 +11,7 @@ export default class docUpdater {
     if (event) return event.target.value;
 
     const milestoneTitle = milestone.title;
-    const owner = currentRepo.owner.login;
+    const owner = currentRepo.owner;
     const repo = currentRepo.name;
     
     let result = '';

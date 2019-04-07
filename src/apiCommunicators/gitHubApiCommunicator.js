@@ -7,12 +7,18 @@ export default class gitHubApiCommunicator {
   }
 
   static submitForm(formData, token) {
-    this.createMilestone(
+    const { owner, name } = formData.currentRepo;
+
+    return this.createMilestone(
       formData,
       token
     ).then(
       response => this.createIssues(formData, token, response)
-    )
+    ).then(
+      new pullRequester({ ...formData, owner, name }, token).openPullRequest()
+    ).catch(
+      err => [err]
+    );
   }
 
   static async createMilestone(formData, token) {
@@ -36,7 +42,7 @@ export default class gitHubApiCommunicator {
     const milestoneNumber = response.data.number;
     const { owner, name } = formData.currentRepo;
 
-    issues.forEach((issue) => {
+    const promises = issues.map((issue) => {
       const params = {
         data: {
           ...issue,
@@ -46,14 +52,16 @@ export default class gitHubApiCommunicator {
         repo: name
       }
 
-      this.createIssue(params, token);
+      return this.createIssue(params, token);
     });
 
-    new pullRequester({ ...formData, owner, name }, token).openPullRequest();
+    return Promise.all(promises).then(
+      values => values
+    ).catch(err => [err])
   }
 
   static async createIssue(params, token) {
-    apiCommunicator.post(
+    return apiCommunicator.post(
       '/repos/:owner/:repo/issues',
       token,
       params,

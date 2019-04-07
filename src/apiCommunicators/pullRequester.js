@@ -20,8 +20,13 @@ export default class pullRequester {
       repo: this.repoName
     }
 
-    apiCommunicator.get(this.baseUrl + '/git/refs/:ref', this.token, params)
-      .then(response => this.createReference(response))
+    return apiCommunicator.get(
+      this.baseUrl + '/git/refs/:ref', this.token, params
+    ).then(
+      response => this.createReference(response)
+    ).catch(
+      err => [err]
+    )
   }
 
   createReference(response) {

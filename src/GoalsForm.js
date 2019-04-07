@@ -25,6 +25,8 @@ class GoalsForm extends Component {
       docText: '',
       milestoneNumber: 1,
       issueNumber: 1,
+      errors: [],
+      success: false,
     };
   }
 
@@ -89,6 +91,18 @@ class GoalsForm extends Component {
     });
   }
 
+  renderResult = () => {
+    if (this.state.success) {
+      return (<p className="success">Success!</p>)
+    } else if (this.state.errors.length > 0) {
+      return this.state.errors.map((error, index) => {
+        return (<p key={index} className="error">{error}</p>)
+      });
+    }
+
+    return null;
+  }
+
   handleChangeRepo = (event) => {
     this.setState({
       currentRepo: this.state.repos[parseInt(event.target.value)]
@@ -124,7 +138,10 @@ class GoalsForm extends Component {
   }
 
   handleSubmit = (event) => {
-    gitHubApiCommunicator.submitForm(this.state, this.props.token);
+    gitHubApiCommunicator.submitForm(
+      this.state,
+      this.props.token,
+    ).then(response => this.setResult(response))
 
     this.setState({
       milestone: {
@@ -136,6 +153,26 @@ class GoalsForm extends Component {
       docText: '',
     });
     event.preventDefault();
+  }
+
+  setResult = (responses) => {
+    responses.map((response) => {
+      if (response.errors) {
+        const errors = response.errors.map((error) => {
+          if (error.code === "missing_field") {
+            return (`${error.resource} is missing ${error.field}`)
+          } else {
+            return "There was a problem!"
+          }
+        });
+
+        this.setState({ errors });
+      } else {
+        this.setState({ success: true });
+      }
+
+      return null;
+    });
   }
 
   updateDoc = (event) => {
@@ -167,6 +204,7 @@ class GoalsForm extends Component {
             repoName={this.state.currentRepo.name}
             updateDocDirectly={this.updateDocDirectly} />
           <section>
+            { this.renderResult() }
             <input className="button" type="submit" value="Submit" />
           </section>
         </form>

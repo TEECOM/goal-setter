@@ -1,5 +1,6 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
+import * as sinon from 'sinon';
 
 import GoalsForm from '../GoalsForm';
 import MilestoneField from '../MilestoneField';
@@ -7,108 +8,123 @@ import IssueField from '../IssueField';
 import DocField from '../DocField';
 import RepoSelector from '../RepoSelector';
 
-import apiCommunicator from '../apiCommunicators/gitHubApiCommunicator';
+import gitHubApiCommunicator from '../apiCommunicators/gitHubApiCommunicator';
 
-const mockRepoData = {
-  data: [
-    { name: 'repo-name', owner: { login: 'repo-owner' } },
-    { name: 'another-repo', owner: { login: 'repo-owner' } },
-  ]
-};
+describe('layout', () => {
+  it('renders a form', () => {
+    const goalsForm = shallow(<GoalsForm />);
 
-jest.mock('../apiCommunicators/gitHubApiCommunicator', () => ({
-  getRepos: jest.fn().mockResolvedValue({
-    data: [
-      { name: 'repo-name', owner: { login: 'repo-owner' } },
-      { name: 'another-repo', owner: { login: 'repo-owner' } },
-    ]
-  }),
-  getMilestonesAndIssues: jest.fn().mockResolvedValue({
-    issues: [],
-    milestones: [],
-  }),
-  submitForm: jest.fn(),
-}));
+    expect(goalsForm.find('form').exists()).toEqual(true);
+  });
 
-it('renders a form', () => {
-  const goalsForm = shallow(<GoalsForm />);
+  it('renders a milestone field', () => {
+    const goalsForm = shallow(<GoalsForm />);
 
-  expect(goalsForm.find('form').exists()).toEqual(true);
-});
+    expect(goalsForm.find(MilestoneField).exists()).toEqual(true);
+  });
 
-it('renders a milestone field', () => {
-  const goalsForm = shallow(<GoalsForm />);
+  it('renders an issue field', () => {
+    const goalsForm = shallow(<GoalsForm />);
 
-  expect(goalsForm.find(MilestoneField).exists()).toEqual(true);
-});
+    expect(goalsForm.find(IssueField).exists()).toEqual(true);
+  });
 
-it('renders an issue field', () => {
-  const goalsForm = shallow(<GoalsForm />);
+  it('renders no result', () => {
+    const goalsForm = mount(<GoalsForm />);
 
-  expect(goalsForm.find(IssueField).exists()).toEqual(true);
-});
+    expect(goalsForm.find(".success").length).toEqual(0)
+    expect(goalsForm.find(".error").length).toEqual(0)
+  });
 
-it('gets milestones and issues upon mount', done => {
-  const token = 'a-token';
-  const owner = mockRepoData.data[0].owner.login;
-  const name = mockRepoData.data[0].name;
+  it('renders errors', () => {
+    const goalsForm = shallow(<GoalsForm />);
+    goalsForm.setState({ errors: ["error-message"] });
 
-  shallow(<GoalsForm token={token}/>);
+    expect(goalsForm.find(".error").text()).toEqual("error-message");
+  });
 
-  setTimeout(() => {
-    expect(apiCommunicator.getMilestonesAndIssues).toHaveBeenCalledWith(
-      token,
-      { owner, repo: name },
-    );
+  it('renders success message', () => {
+    const goalsForm = shallow(<GoalsForm />);
+    goalsForm.setState({ success: true });
 
-    done();
+    expect(goalsForm.find(".success").text()).toEqual("Success!");
   });
 });
 
-it('sets milestone and issue numbers', () => {
-  const issues = [{ number: 19 }];
-  const milestones = [{ number: 1 }];
-  const goalsForm = shallow(<GoalsForm />);
-  
-  goalsForm.instance().setMilestoneAndIssueNumbers({ issues, milestones });
+describe('initialization', () => {
+  it('gets milestones and issues upon mount', async () => {
+    const token = 'a-token';
+    const repo = 'repo-name';
+    const owner = 'repo-owner';
+    sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+      { data: [{ name: repo, owner: { login: owner }, default_branch: '' }] }
+    )
+    const getMilestonesAndIssuesStub = sinon.stub(
+      gitHubApiCommunicator,
+      "getMilestonesAndIssues",
+    );
+    getMilestonesAndIssuesStub.withArgs(
+      token,
+      { owner, repo },
+    ).resolves({ issues: "", milestones: "" })
 
-  expect(goalsForm.state().milestoneNumber).toEqual(2);
-  expect(goalsForm.state().issueNumber).toEqual(20);
+    shallow(<GoalsForm token={token}/>);
+
+    await resolvePromises();
+
+    expect(getMilestonesAndIssuesStub.getCall(0).args).toEqual(
+      [token, { owner, repo }],
+    )
+  });
+
+  it('sets milestone and issue numbers', () => {
+    const issues = [{ number: 19 }];
+    const milestones = [{ number: 1 }];
+    const goalsForm = shallow(<GoalsForm />);
+    
+    goalsForm.instance().setMilestoneAndIssueNumbers({ issues, milestones });
+
+    expect(goalsForm.state().milestoneNumber).toEqual(2);
+    expect(goalsForm.state().issueNumber).toEqual(20);
+  });
 });
 
-it('updates the repo link', done => {
-  const goalsForm = mount(<GoalsForm />);
-  const repoLink = goalsForm.find(RepoSelector);
+describe('interaction', () => {
+  it('updates the repo link', async () => {
+    const repo = 'repo-name';
+    const owner = 'repo-owner';
+    sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+      { data: [
+        { name: repo, owner: { login: owner }, default_branch: '' },
+        { name: 'another-repo', owner: { login: owner }, default_branch: '' },
+      ] }
+    )
+    const goalsForm = mount(<GoalsForm />);
 
-  setTimeout(() => {
+    await resolvePromises();
+
+    const repoLink = goalsForm.find(RepoSelector);
     repoLink.find('select').simulate('change', { target: { value: 1 } });
 
     expect(goalsForm.state().currentRepo.name).toEqual('another-repo');
-    done();
   });
-});
 
-it('updates the milestone title', done => {
-  const title = 'A Great Title';
-  const goalsForm = shallow(<GoalsForm />);
+  it('updates the milestone title', () => {
+    const title = 'A Great Title';
+    const goalsForm = shallow(<GoalsForm />);
 
-  setTimeout(() => {
     goalsForm.instance().handleChangeMilestoneTitle({
       target: { value: title },
     });
 
-    expect(goalsForm.state().milestone.title).toBe(title);
-
-    done();
+    expect(goalsForm.state().milestone.title).toEqual(title);
   });
-});
 
-it('updates the issue title', done => {
-  const title = 'A Great Title';
-  const newTitle = 'A Greater Title';
-  const goalsForm = mount(<GoalsForm />);
+  it('updates the issue title', () => {
+    const title = 'A Great Title';
+    const newTitle = 'A Greater Title';
+    const goalsForm = shallow(<GoalsForm />);
 
-  setTimeout(() => {
     goalsForm.setState({ issues: [{ title: title }] });
 
     const issueField = goalsForm.find(IssueField).at(0);
@@ -116,94 +132,189 @@ it('updates the issue title', done => {
       target: { value: newTitle },
     });
 
-    expect(goalsForm.state().issues[0].title).toBe(newTitle);
-
-    done();
+    expect(goalsForm.state().issues[0].title).toEqual(newTitle);
   });
-});
 
-it('updates the issue body', done => {
-  const body = 'A Great Body';
-  const newBody = 'A Greater Body';
-  const goalsForm = mount(<GoalsForm />);
+  it('updates the issue body', () => {
+    const body = 'A Great Body';
+    const newBody = 'A Greater Body';
+    const goalsForm = mount(<GoalsForm />);
 
-  setTimeout(() => {
-    goalsForm.setState({ issues: [{
-      title: 'A Title',
-      body: body
-    }] });
+    goalsForm.setState({ issues: [
+      { title: 'A Title', body: body }
+    ] });
 
     const issueField = goalsForm.find(IssueField).at(0);
     issueField.props().handleChangeBody({
       target: { value: newBody },
     });
 
-    expect(goalsForm.state().issues[0].body).toBe(newBody);
-
-    done();
+    expect(goalsForm.state().issues[0].body).toEqual(newBody);
   });
-});
 
-it('adds a new field', done => {
-  const goalsForm = shallow(<GoalsForm />);
+  it('adds a new field', () => {
+    const goalsForm = shallow(<GoalsForm />);
 
-  setTimeout(() => {
     goalsForm.instance().addIssue();
 
     expect(goalsForm.state().issues).toEqual([
       {title: '', body: ''},
       {title: '', body: ''}
     ]);
+  });
 
-    done();
+  it('updates the doc directly', () => {
+    const docText = "A Great Doc";
+    const goalsForm = mount(<GoalsForm />);
+    const docField = goalsForm.find(DocField).at(0);
+
+    docField.props().updateDocDirectly({
+      target: { value: docText },
+    });
+
+    expect(goalsForm.state().docText).toEqual(docText);
+  });
+
+  describe('form submission', () => {
+    it('handles submission', () => {
+      const preventDefault = jest.fn();
+
+      const token = 'a-token';
+      const repo = 'repo-name';
+      const owner = 'repo-owner';
+      const milestone = { title: 'A Great Milestone' };
+      const issues = [
+        { title: 'A Great Issue', issueBody: 'The Body of A Great Issue' },
+      ];
+      const repos = [
+        { name: repo, owner: { login: owner }, default_branch: '' },
+      ];
+      const docText = 'A great Text';
+      const expectedData = {
+        milestone,
+        issues,
+        docText,
+        milestoneNumber: 1,
+        issueNumber: 1,
+        repos,
+        currentRepo: repos[0],
+        errors: [],
+        success: false,
+      }
+
+      sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+        { data: repos }
+      )
+      const getMilestonesAndIssuesStub = sinon.stub(
+        gitHubApiCommunicator,
+        "getMilestonesAndIssues",
+      );
+      getMilestonesAndIssuesStub.withArgs(
+        token,
+        { owner, repo },
+      ).resolves({ issues: "", milestones: "" })
+      const submitFormStub = sinon.stub(
+        gitHubApiCommunicator,
+        "submitForm",
+      );
+      submitFormStub.withArgs(
+        expectedData,
+        token,
+      ).resolves([])
+
+      const goalsForm = shallow(<GoalsForm token={token} />);
+      goalsForm.setState(expectedData);
+
+      goalsForm.find('form').simulate('submit', { preventDefault });
+
+      expect(gitHubApiCommunicator.submitForm.getCall(0).args).toEqual([expectedData, token]);
+    });
+
+    it('sets submission result', async () => {
+      const preventDefault = jest.fn();
+      sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+        { data: [{ name: '', owner: {}, branch: '' }] }
+      )
+      const getMilestonesAndIssuesStub = sinon.stub(
+        gitHubApiCommunicator,
+        "getMilestonesAndIssues",
+      );
+      getMilestonesAndIssuesStub.resolves({ issues: "", milestones: "" })
+      const submitFormStub = sinon.stub(
+        gitHubApiCommunicator,
+        "submitForm",
+      );
+      submitFormStub.resolves([{}])
+
+      const goalsForm = shallow(<GoalsForm token={'A Great Token'} />);
+
+      goalsForm.find('form').simulate('submit', { preventDefault });
+
+      await resolvePromises();
+
+      expect(goalsForm.state().success).toEqual(true);
+    });
+
+    it('sets errors', async () => {
+      const preventDefault = jest.fn();
+      sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+        { data: [{ name: '', owner: {}, branch: '' }] }
+      )
+      const getMilestonesAndIssuesStub = sinon.stub(
+        gitHubApiCommunicator,
+        "getMilestonesAndIssues",
+      );
+      getMilestonesAndIssuesStub.resolves({ issues: "", milestones: "" })
+      const submitFormStub = sinon.stub(
+        gitHubApiCommunicator,
+        "submitForm",
+      );
+      submitFormStub.resolves([{ errors: [
+        { code: "missing_field", resource: "a-resource", field: "a-field" },
+      ]}])
+
+      const goalsForm = shallow(<GoalsForm token={'A Great Token'} />);
+
+      goalsForm.find('form').simulate('submit', { preventDefault });
+
+      await resolvePromises();
+
+      expect(goalsForm.state().success).toEqual(false);
+      expect(goalsForm.state().errors).toEqual(["a-resource is missing a-field"]);
+    });
+
+    it('handles codeless errors', async () => {
+      const preventDefault = jest.fn();
+      sinon.stub(gitHubApiCommunicator, "getRepos").resolves(
+        { data: [{ name: '', owner: {}, branch: '' }] }
+      )
+      const getMilestonesAndIssuesStub = sinon.stub(
+        gitHubApiCommunicator,
+        "getMilestonesAndIssues",
+      );
+      getMilestonesAndIssuesStub.resolves({ issues: "", milestones: "" })
+      const submitFormStub = sinon.stub(
+        gitHubApiCommunicator,
+        "submitForm",
+      );
+      submitFormStub.resolves([{ errors: [
+        { code: "unknown" },
+      ]}])
+
+      const goalsForm = shallow(<GoalsForm token={'A Great Token'} />);
+
+      goalsForm.find('form').simulate('submit', { preventDefault });
+
+      await resolvePromises();
+
+      expect(goalsForm.state().success).toEqual(false);
+      expect(goalsForm.state().errors).toEqual(["There was a problem!"]);
+    });
   });
 });
 
-it('updates the doc directly', () => {
-  const docText = "A Great Doc";
-  const goalsForm = mount(<GoalsForm />);
-  const docField = goalsForm.find(DocField).at(0);
-
-  docField.props().updateDocDirectly({
-    target: { value: docText },
-  });
-
-  expect(goalsForm.state().docText).toBe(docText);
-});
-
-it('handles submission', done => {
-  const preventDefault = jest.fn();
-
-  const token = 'A Great Token';
-  const goalsForm = shallow(<GoalsForm token={token} />);
-  const milestone = { title: 'A Great Milestone' };
-  const issues = [
-    { title: 'A Great Issue', issueBody: 'The Body of A Great Issue' },
-  ];
-  const docText = 'A great Text';
-  const repos = mockRepoData.data.map((repo) => {
-    return { name: repo.name, owner: repo.owner.login }
-  });
-  
-  const data = {
-    milestone,
-    issues,
-    docText,
-    milestoneNumber: 1,
-    issueNumber: 1,
-    repos,
-    currentRepo: repos[0],
-  }
-  goalsForm.setState({ milestone, issues, docText });
-
-  setTimeout(() => {
-    goalsForm.find('form').simulate('submit', { preventDefault });
-
-    expect(apiCommunicator.submitForm).toHaveBeenCalledWith(
-      data,
-      token,
-    );
-
-    done();
-  });
-});
+const resolvePromises = () => {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  })
+};

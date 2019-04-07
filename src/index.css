@@ -89,3 +89,16 @@ section.row {
   width: 100%;
   text-align: right;
 }
+
+.error {
+  padding: 0.5rem;
+  border: 1px solid #E8420C;
+  background: #FF6400;
+  color: white;
+}
+
+.success {
+  padding: 0.5rem;
+  background: #0E7F00;
+  color: white;
+}

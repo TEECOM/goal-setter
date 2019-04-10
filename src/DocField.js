@@ -2,17 +2,25 @@ import React, { Component } from 'react';
 
 class DocField extends Component {
   render() {
-    const filepath = this.props.repoName + 
-      " / doc / goals / 2019-q1.md"
+    const prefix = this.props.repoName + " / doc / goals /"
+    const filepath =  (
+      <div>
+        <span>{ prefix }</span>
+        <input
+          onChange={this.props.updateFilename}
+          value={this.props.filename} />
+        .md
+      </div>
+    )
 
     return (
       <section className="doc">
-        <div>{ filepath }</div>
+        { filepath }
         <textarea
           className="doc input"
           rows="10"
-          onChange={this.props.updateDocDirectly}
-          value={this.props.docText} />
+          onChange={this.props.updateTextDirectly}
+          value={this.props.text} />
       </section>
     );
   }

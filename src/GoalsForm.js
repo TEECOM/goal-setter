@@ -22,6 +22,7 @@ class GoalsForm extends Component {
       issues: [
         { title: '', body: '' },
       ],
+      docFilename: '2112-q1',
       docText: '',
       milestoneNumber: 1,
       issueNumber: 1,
@@ -150,6 +151,7 @@ class GoalsForm extends Component {
       issues: [
         { title: '', body: '' },
       ],
+      docFilename: '2112-q1',
       docText: '',
     });
     event.preventDefault();
@@ -181,6 +183,10 @@ class GoalsForm extends Component {
     this.setState({docText: result});
   }
 
+  updateDocFilename = (event) => {
+    this.setState({docFilename: event.target.value});
+  }
+
   updateDocDirectly = (event) => {
     this.setState({docText: event.target.value});
   }
@@ -200,9 +206,11 @@ class GoalsForm extends Component {
             <button className="plus button" type="button" onClick={this.addIssue}>+</button>
           </section>
           <DocField
-            docText={this.state.docText}
+            filename={this.state.docFilename}
+            text={this.state.docText}
             repoName={this.state.currentRepo.name}
-            updateDocDirectly={this.updateDocDirectly} />
+            updateFilename={this.updateDocFilename}
+            updateTextDirectly={this.updateDocDirectly} />
           <section>
             { this.renderResult() }
             <input className="button" type="submit" value="Submit" />

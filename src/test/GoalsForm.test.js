@@ -163,12 +163,25 @@ describe('interaction', () => {
     ]);
   });
 
-  it('updates the doc directly', () => {
+  it('updates the doc filename', () => {
+    const docFilename = "A Great Filename";
+    const goalsForm = mount(<GoalsForm />);
+    const docField = goalsForm.find(DocField).at(0);
+
+    docField.props().updateFilename({
+      target: { value: docFilename },
+    });
+
+    expect(goalsForm.state().docFilename).toEqual(docFilename);
+    
+  });
+
+  it('updates the doc text directly', () => {
     const docText = "A Great Doc";
     const goalsForm = mount(<GoalsForm />);
     const docField = goalsForm.find(DocField).at(0);
 
-    docField.props().updateDocDirectly({
+    docField.props().updateTextDirectly({
       target: { value: docText },
     });
 
@@ -189,10 +202,12 @@ describe('interaction', () => {
       const repos = [
         { name: repo, owner: { login: owner }, default_branch: '' },
       ];
+      const docFilename = 'a great filename';
       const docText = 'A great Text';
       const expectedData = {
         milestone,
         issues,
+        docFilename,
         docText,
         milestoneNumber: 1,
         issueNumber: 1,

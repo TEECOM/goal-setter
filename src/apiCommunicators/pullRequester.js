@@ -2,12 +2,22 @@ import apiCommunicator from './apiCommunicator';
 
 export default class pullRequester {
   constructor(formData, token) {
-    const { milestone, issues, docText, owner, name, currentRepo } = formData;
+    const {
+      milestone,
+      issues,
+      docFilename,
+      docText,
+      owner,
+      name,
+      currentRepo
+    } = formData;
+
     this.baseUrl = '/repos/:owner/:repo';
     this.issues = issues;
     this.milestone = milestone.title;
     this.formattedMilestone = this.milestone.replace(/\s+/g, '-').toLowerCase();
     this.token = token;
+    this.docFilename = docFilename;
     this.docText = docText;
     this.owner = owner;
     this.repoName = name;
@@ -96,7 +106,7 @@ export default class pullRequester {
         "base_tree": parentSha,
         "tree": [
           {
-            "path": `docs/goals/${this.formattedMilestone}.md`,
+            "path": `docs/goals/${this.docFilename}.md`,
             "mode": "100644",
             "type": "blob",
             "sha": newSha,

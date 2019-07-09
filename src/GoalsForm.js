@@ -107,7 +107,12 @@ class GoalsForm extends Component {
   handleChangeRepo = (event) => {
     this.setState({
       currentRepo: this.state.repos[parseInt(event.target.value)]
-    })
+    }, this.updateMilestoneAndIssue)
+  }
+
+  updateMilestoneAndIssue = () => {
+    this.getMilestonesAndIssues(this.state.currentRepo)
+      .then(response => this.setMilestoneAndIssueNumbers(response))
   }
 
   handleChangeMilestoneTitle = (event) => {

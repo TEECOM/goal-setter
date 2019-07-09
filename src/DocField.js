@@ -4,13 +4,15 @@ class DocField extends Component {
   render() {
     const prefix = this.props.repoName + " / doc / goals /"
     const filepath =  (
-      <div>
-        <span>{ prefix }</span>
-        <input
-          onChange={this.props.updateFilename}
-          value={this.props.filename} />
-        .md
-      </div>
+      <section className="docfield">
+        <div>
+          <span>{ prefix }</span>
+          <input
+            onChange={this.props.updateFilename}
+            value={this.props.filename} />
+          .md
+        </div>
+      </section>
     )
 
     return (

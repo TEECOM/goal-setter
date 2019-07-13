@@ -22,25 +22,50 @@ class RepoSelector extends Component {
     this.toggleDropdown();
   }
 
+  back = () => {
+
+  }
+
+  forward = () => {
+
+  }
+
   renderOptions = () => {
+    let result;
+
     if (this.state.visible) {
-      return this.props.repoNames.map((name, i) => {
+      result = this.props.repoNames.map((name, i) => {
         return (
-          <div value={i} key={i} onClick={this.selectRepo}>
+          <div className="dropdown-item" value={i} key={i} onClick={this.selectRepo}>
             {name}
           </div>
         )
       });
+
+      return (
+        <nav>
+          {result}
+          <div className="list-navigation">
+            <span className="arrow" onClick={this.back}>
+              &lt;
+            </span>
+            <span className="arrow" onClick={this.forward}>
+              &gt;
+            </span>
+          </div>
+        </nav>
+      )
     }
+
+    return;
   }
 
   render() {
     return (
-      <nav>
-        <p>Select Repo</p>
-        <div onClick={this.toggleDropdown}>{this.props.currentRepo.name}</div>
+      <div className="repo-selector">
+        <div className="current-repo" onClick={this.toggleDropdown}>{this.props.currentRepo.name}</div>
         {this.renderOptions()}
-      </nav>
+      </div>
     );
   }
 }

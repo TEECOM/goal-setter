@@ -1,0 +1,38 @@
+nav {
+  background: #9fc3cb;
+  padding: 1rem 0;
+  position: absolute;
+}
+
+.current-repo {
+  font-weight: bold;
+  padding: 0 1rem;
+}
+
+.dropdown-item {
+  padding: 0.25rem 1rem;
+}
+
+.dropdown-item:hover {
+  background: white;
+}
+
+.list-navigation {
+  display: flex;
+  justify-content: space-around;
+}
+
+.list-navigation:hover {
+  background: #FFE5B4;
+}
+
+.arrow {
+  font-size: 3rem;
+  padding: 0.25rem 1rem;
+}
+
+.repo-selector {
+  background: #9fc3cb;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+}

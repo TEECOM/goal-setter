@@ -28,8 +28,8 @@ class GoalsForm extends Component {
       issueNumber: 1,
       errors: [],
       success: false,
-      nextRepoSelectorPageLink: null,
-      lastRepoSelectorPageLink: null
+      prevRepoSelectorPageLink: null,
+      nextRepoSelectorPageLink: null
     };
   }
 
@@ -37,9 +37,7 @@ class GoalsForm extends Component {
     this.getRepos();
   }
 
-  getRepos() {
-    const url = this.state.nextRepoSelectorPageLink
-
+  getRepos(url = null) {
     gitHubApiCommunicator.getRepos(this.props.token, url)
       .then(repoData => this.setRepos(repoData))
       .then(repo => this.getMilestonesAndIssues(repo))
@@ -65,17 +63,17 @@ class GoalsForm extends Component {
 
   setPagination(repoData) {
     const links = repoData.headers.link.split(",")
-    const result = {}
+    const result = {prev: null, next: null}
 
     links.map((link) => {
       const key = JSON.parse(link.match(/".*"/g)[0])
-      const value = link.match(/[^<>]+/)[0]
+      const value = link.match(/[^\s<>]+/)[0]
       result[key] = value
     });
 
     this.setState({
-      nextRepoSelectorPageLink: result.next,
-      lastRepoSelectorPageLink: result.last
+      prevRepoSelectorPageLink: result.prev,
+      nextRepoSelectorPageLink: result.next
     });
   }
 
@@ -132,14 +130,24 @@ class GoalsForm extends Component {
     }, this.updateMilestoneAndIssue)
   }
 
-  pageRepoSelectorForward = () => {
-    //this.setState({repoSelectorPage: page});
-    this.getRepos()
+  atBeginningOfRepoSelector = () => {
+    return this.state.prevRepoSelectorPageLink == null
   }
 
-  pageRepoSelectorBack = () => {
-    //this.setState({repoSelectorPage: page});
-    this.getRepos()
+  atEndOfRepoSelector = () => {
+    return this.state.nextRepoSelectorPageLink == null
+  }
+
+  pageRepoSelectorNext = () => {
+    if (this.state.nextRepoSelectorPageLink) {
+      this.getRepos(this.state.nextRepoSelectorPageLink);
+    }
+  }
+
+  pageRepoSelectorPrev = () => {
+    if (this.state.prevRepoSelectorPageLink) {
+      this.getRepos(this.state.prevRepoSelectorPageLink);
+    }
   }
 
   updateMilestoneAndIssue = () => {
@@ -235,8 +243,10 @@ class GoalsForm extends Component {
           repoNames={this.buildRepoNames()}
           handleChange={this.handleChangeRepo}
           currentRepo={this.state.currentRepo}
-          back={this.pageRepoSelectorBack}
-          forward={this.pageRepoSelectorForward} />
+          atBeginning={this.atBeginningOfRepoSelector()}
+          atEnd={this.atEndOfRepoSelector()}
+          prev={this.pageRepoSelectorPrev}
+          next={this.pageRepoSelectorNext} />
         <form onSubmit={this.handleSubmit}>
           <MilestoneField
             value={this.state.milestone.title}

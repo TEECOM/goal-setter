@@ -5,8 +5,6 @@ class RepoSelector extends Component {
     super(props);
 
     this.state = {
-      back: "disabled arrow",
-      forward: "arrow",
       visible: false
     }
   }
@@ -22,6 +20,22 @@ class RepoSelector extends Component {
   selectRepo = (event) => {
     this.props.handleChange(event);
     this.toggleDropdown();
+  }
+
+  prevClassName = () => {
+    if (this.props.atBeginning) {
+      return "disabled arrow"
+    } else {
+      return "arrow"
+    }
+  }
+
+  nextClassName = () => {
+    if (this.props.atEnd) {
+      return "disabled arrow"
+    } else {
+      return "arrow"
+    }
   }
 
   renderOptions = () => {
@@ -40,10 +54,10 @@ class RepoSelector extends Component {
         <nav>
           {result}
           <div className="list-navigation">
-            <span className={this.state.back} onClick={this.props.back}>
+            <span className={this.prevClassName()} onClick={this.props.prev}>
               &lt;
             </span>
-            <span className={this.state.forward} onClick={this.props.forward}>
+            <span className={this.nextClassName()} onClick={this.props.next}>
               &gt;
             </span>
           </div>

@@ -22,13 +22,24 @@ nav {
   justify-content: space-around;
 }
 
-.list-navigation:hover {
+.arrow {
+  flex: 1;
+  font-size: 3rem;
+  padding: 0.25rem 1rem;
+  text-align: center;
+}
+
+.arrow:hover {
   background: #FFE5B4;
 }
 
-.arrow {
-  font-size: 3rem;
-  padding: 0.25rem 1rem;
+.disabled {
+  background: #f7f7f8;
+  color: #c2c2ca;
+}
+
+.disabled:hover {
+  background: #f7f7f8;
 }
 
 .repo-selector {

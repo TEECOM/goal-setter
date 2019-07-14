@@ -28,21 +28,27 @@ class GoalsForm extends Component {
       issueNumber: 1,
       errors: [],
       success: false,
+      nextRepoSelectorPageLink: null,
+      lastRepoSelectorPageLink: null
     };
   }
 
   componentDidMount() {
-    this.getRepos()
+    this.getRepos();
+  }
+
+  getRepos() {
+    const url = this.state.nextRepoSelectorPageLink
+
+    gitHubApiCommunicator.getRepos(this.props.token, url)
       .then(repoData => this.setRepos(repoData))
       .then(repo => this.getMilestonesAndIssues(repo))
       .then(response => this.setMilestoneAndIssueNumbers(response))
   }
 
-  getRepos() {
-    return gitHubApiCommunicator.getRepos(this.props.token);
-  }
-
   setRepos(repoData) {
+    this.setPagination(repoData);
+
     const repos = repoData.data.map((repo) => {
       return {
         name: repo.name,
@@ -55,6 +61,22 @@ class GoalsForm extends Component {
     this.setState({ repos, currentRepo });
 
     return currentRepo;
+  }
+
+  setPagination(repoData) {
+    const links = repoData.headers.link.split(",")
+    const result = {}
+
+    links.map((link) => {
+      const key = JSON.parse(link.match(/".*"/g)[0])
+      const value = link.match(/[^<>]+/)[0]
+      result[key] = value
+    });
+
+    this.setState({
+      nextRepoSelectorPageLink: result.next,
+      lastRepoSelectorPageLink: result.last
+    });
   }
 
   getMilestonesAndIssues(repo) {
@@ -108,6 +130,16 @@ class GoalsForm extends Component {
     this.setState({
       currentRepo: this.state.repos[event.target.getAttribute("value")]
     }, this.updateMilestoneAndIssue)
+  }
+
+  pageRepoSelectorForward = () => {
+    //this.setState({repoSelectorPage: page});
+    this.getRepos()
+  }
+
+  pageRepoSelectorBack = () => {
+    //this.setState({repoSelectorPage: page});
+    this.getRepos()
   }
 
   updateMilestoneAndIssue = () => {
@@ -202,7 +234,9 @@ class GoalsForm extends Component {
         <RepoSelector
           repoNames={this.buildRepoNames()}
           handleChange={this.handleChangeRepo}
-          currentRepo={this.state.currentRepo} />
+          currentRepo={this.state.currentRepo}
+          back={this.pageRepoSelectorBack}
+          forward={this.pageRepoSelectorForward} />
         <form onSubmit={this.handleSubmit}>
           <MilestoneField
             value={this.state.milestone.title}

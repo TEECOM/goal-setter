@@ -1,0 +1,49 @@
+nav {
+  background: #9fc3cb;
+  padding: 1rem 0;
+  position: absolute;
+}
+
+.current-repo {
+  font-weight: bold;
+  padding: 0 1rem;
+}
+
+.dropdown-item {
+  padding: 0.25rem 1rem;
+}
+
+.dropdown-item:hover {
+  background: white;
+}
+
+.list-navigation {
+  display: flex;
+  justify-content: space-around;
+}
+
+.arrow {
+  flex: 1;
+  font-size: 3rem;
+  padding: 0.25rem 1rem;
+  text-align: center;
+}
+
+.arrow:hover {
+  background: #FFE5B4;
+}
+
+.disabled {
+  background: #f7f7f8;
+  color: #c2c2ca;
+}
+
+.disabled:hover {
+  background: #f7f7f8;
+}
+
+.repo-selector {
+  background: #9fc3cb;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+}

@@ -6,6 +6,7 @@ import './docfield.css';
 import './index.css';
 import './issue.css';
 import './milestone.css';
+import './reposelector.css';
 import './typography.css';
 
 ReactDOM.render(<GoalSetter />, document.getElementById('root'));

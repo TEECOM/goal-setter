@@ -13,7 +13,7 @@ export default class apiCommunicator {
           direction: 'desc',
           state: 'all',
           type: 'all',
-          per_page: 500,
+          per_page: 20,
         },
         params,
       )

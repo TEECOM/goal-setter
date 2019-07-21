@@ -2,8 +2,12 @@ import apiCommunicator from './apiCommunicator';
 import pullRequester from './pullRequester';
 
 export default class gitHubApiCommunicator {
-  static getRepos(token) {
-    return apiCommunicator.get('/user/repos', token, {});
+  static getRepos(token, url) {
+    if (url) {
+      return apiCommunicator.get(url, token)
+    } else {
+      return apiCommunicator.get('/user/repos', token, {});
+    }
   }
 
   static submitForm(formData, token) {
